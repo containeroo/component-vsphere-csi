@@ -40,7 +40,7 @@ parameters:
       csi_provisioner:
         registry: registry.k8s.io
         repository: sig-storage/csi-provisioner
-        tag: v4.0.1
+        tag: v6.2.0
       csi_snapshotter:
         registry: registry.k8s.io
         repository: sig-storage/csi-snapshotter
