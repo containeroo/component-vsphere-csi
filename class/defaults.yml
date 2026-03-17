@@ -20,7 +20,7 @@ parameters:
       csi_attacher:
         registry: registry.k8s.io
         repository: sig-storage/csi-attacher
-        tag: v4.9.0
+        tag: v4.11.0
       csi_resizer:
         registry: registry.k8s.io
         repository: sig-storage/csi-resizer
