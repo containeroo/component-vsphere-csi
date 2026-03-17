@@ -37,7 +37,7 @@ parameters:
       csi_resizer:
         registry: k8s.gcr.io
         repository: sig-storage/csi-resizer
-        tag: v1.7.0
+        tag: v1.14.0
       driver:
         registry: gcr.io
         repository: cloud-provider-vsphere/csi/release/driver
