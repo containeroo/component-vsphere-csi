@@ -6,7 +6,7 @@ parameters:
     configuration:
       global:
         cluster-id: test-openshift
-        cluster-distribution: openshift4
+        cluster-distribution: ${facts:distribution}
       vcsa-01.example.com:
         user: administrator@vsphere.local
         password: changeme

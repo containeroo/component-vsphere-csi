@@ -8,7 +8,7 @@ parameters:
     configuration:
       global:
         cluster-id: test-cluster
-        cluster-distribution: kind
+        cluster-distribution: ${facts:distribution}
       vcsa-01.example.com:
         user: administrator@vsphere.local
         password: changeme
