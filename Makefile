@@ -35,6 +35,10 @@ lint_kubent: ## Check for deprecated Kubernetes API versions
 .PHONY: format
 format: format_jsonnet ## All-in-one formatting
 
+.PHONY: sync-release
+sync-release: ## Sync manifest-derived defaults from the current vSphere CSI driver release
+	node scripts/sync-vsphere-csi-release.mjs
+
 .PHONY: format_jsonnet
 format_jsonnet: $(JSONNET_FILES) ## Format jsonnet files
 	$(JSONNET_DOCKER) $(JSONNETFMT_ARGS) -- $?

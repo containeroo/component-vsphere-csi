@@ -246,7 +246,7 @@ By default this matches upstream and allows any of the common control-plane labe
 
 [horizontal]
 type:: list
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream control-plane tolerations]
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream control-plane tolerations]
 
 Tolerations for the controller deployment.
 
@@ -327,7 +327,7 @@ Node selector for the Linux node DaemonSet.
 
 [horizontal]
 type:: list
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream node tolerations]
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream node tolerations]
 
 Tolerations for the Linux node DaemonSet.
 
