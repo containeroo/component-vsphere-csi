@@ -61,7 +61,7 @@ parameters:
       csi_node_driver_registrar:
         registry: k8s.gcr.io
         repository: sig-storage/csi-node-driver-registrar
-        tag: v2.7.0
+        tag: v2.16.0
 
     controller:
       replicas: 3
