@@ -57,7 +57,7 @@ parameters:
       csi_snapshotter:
         registry: k8s.gcr.io
         repository: sig-storage/csi-snapshotter
-        tag: v6.2.1
+        tag: v8.5.0
       csi_node_driver_registrar:
         registry: k8s.gcr.io
         repository: sig-storage/csi-node-driver-registrar
