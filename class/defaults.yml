@@ -12,56 +12,43 @@ parameters:
         cluster-distribution: ${facts:distribution}
 
     feature_states:
-      csi-migration: "true"
-      csi-auth-check: "true"
-      online-volume-extend: "true"
       trigger-csi-fullsync: "false"
-      async-query-volume: "true"
-      block-volume-snapshot: "true"
-      csi-windows-support: "false"
-      use-csinode-id: "true"
-      list-volumes: "true"
       pv-to-backingdiskobjectid-mapping: "false"
-      cnsmgr-suspend-create-volume: "true"
-      topology-preferential-datastores: "true"
-      max-pvscsi-targets-per-vm: "true"
-      multi-vcenter-csi-topology: "true"
-      csi-internal-generated-cluster-id: "true"
-      listview-tasks: "false"
+      csi-transaction-support: "false"
 
     images:
       csi_attacher:
         registry: registry.k8s.io
         repository: sig-storage/csi-attacher
-        tag: v4.2.0
+        tag: v4.9.0
       csi_resizer:
         registry: registry.k8s.io
         repository: sig-storage/csi-resizer
-        tag: v1.7.0
+        tag: v1.12.0
       driver:
-        registry: gcr.io
-        repository: cloud-provider-vsphere/csi/release/driver
-        tag: v3.0.0
+        registry: registry.k8s.io
+        repository: csi-vsphere/driver
+        tag: v3.6.1
       syncer:
-        registry: gcr.io
-        repository: cloud-provider-vsphere/csi/release/syncer
-        tag: v3.0.0
+        registry: registry.k8s.io
+        repository: csi-vsphere/syncer
+        tag: v3.6.1
       liveness_probe:
         registry: registry.k8s.io
         repository: sig-storage/livenessprobe
-        tag: v2.9.0
+        tag: v2.15.0
       csi_provisioner:
         registry: registry.k8s.io
         repository: sig-storage/csi-provisioner
-        tag: v3.4.0
+        tag: v4.0.1
       csi_snapshotter:
         registry: registry.k8s.io
         repository: sig-storage/csi-snapshotter
-        tag: v6.2.1
+        tag: v8.2.0
       csi_node_driver_registrar:
         registry: registry.k8s.io
         repository: sig-storage/csi-node-driver-registrar
-        tag: v2.7.0
+        tag: v2.13.0
 
     controller:
       replicas: 3
@@ -71,8 +58,19 @@ parameters:
       image_pull_policy: Always
       full_sync_interval_minutes: 30
       default_fstype: ext4
-      node_selector:
-        node-role.kubernetes.io/control-plane: ""
+      node_selector: {}
+      node_affinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+            - matchExpressions:
+                - key: node-role.kubernetes.io/controlplane
+                  operator: Exists
+            - matchExpressions:
+                - key: node-role.kubernetes.io/master
+                  operator: Exists
       tolerations:
         - key: node-role.kubernetes.io/master
           operator: Exists

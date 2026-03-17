@@ -1,0 +1,15 @@
+---
+parameters:
+  facts:
+    distribution: openshift4
+  vsphere_csi:
+    configuration:
+      global:
+        cluster-id: test-openshift
+        cluster-distribution: openshift4
+      vcsa-01.example.com:
+        user: administrator@vsphere.local
+        password: changeme
+        port: "443"
+        insecure-flag: "true"
+        datacenters: DC0

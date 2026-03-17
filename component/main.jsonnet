@@ -1,6 +1,7 @@
 local kap = import 'lib/kapitan.libjsonnet';
 local inv = kap.inventory();
 local params = inv.parameters.vsphere_csi;
+local distribution = std.get(inv.parameters.facts, 'distribution', '');
 
 local reservedConfigurationKeys = [
   'global',
@@ -91,6 +92,30 @@ local nodePodLabels = {
   app: 'vsphere-csi-node',
   role: 'vsphere-csi',
 };
+
+local controllerAffinity = {
+  podAntiAffinity: {
+    requiredDuringSchedulingIgnoredDuringExecution: [
+      {
+        labelSelector: {
+          matchExpressions: [
+            {
+              key: 'app',
+              operator: 'In',
+              values: [ 'vsphere-csi-controller' ],
+            },
+          ],
+        },
+        topologyKey: 'kubernetes.io/hostname',
+      },
+    ],
+  },
+} + (
+  if std.length(std.objectFields(std.get(params.controller, 'node_affinity', {}))) == 0 then
+    {}
+  else
+    { nodeAffinity: params.controller.node_affinity }
+);
 
 assert std.length(std.objectFields(vcenters)) > 0 :
        'vsphere_csi.configuration must define at least one vCenter section besides the reserved keys %s' %
@@ -318,6 +343,42 @@ assert std.length(std.objectFields(vcenters)) > 0 :
     },
   },
 
+  [if distribution == 'openshift4' then '09_controller-privileged-scc' else null]: {
+    apiVersion: 'rbac.authorization.k8s.io/v1',
+    kind: 'RoleBinding',
+    metadata: metadata('vsphere-csi-controller-privileged-scc', params.namespace),
+    roleRef: {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'ClusterRole',
+      name: 'system:openshift:scc:privileged',
+    },
+    subjects: [
+      {
+        kind: 'ServiceAccount',
+        name: 'vsphere-csi-controller',
+        namespace: params.namespace,
+      },
+    ],
+  },
+
+  [if distribution == 'openshift4' then '09_node-privileged-scc' else null]: {
+    apiVersion: 'rbac.authorization.k8s.io/v1',
+    kind: 'RoleBinding',
+    metadata: metadata('vsphere-csi-node-privileged-scc', params.namespace),
+    roleRef: {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'ClusterRole',
+      name: 'system:openshift:scc:privileged',
+    },
+    subjects: [
+      {
+        kind: 'ServiceAccount',
+        name: 'vsphere-csi-node',
+        namespace: params.namespace,
+      },
+    ],
+  },
+
   '10_feature-states-configmap': {
     apiVersion: 'v1',
     kind: 'ConfigMap',
@@ -388,26 +449,10 @@ assert std.length(std.objectFields(vcenters)) > 0 :
         },
         spec: {
           priorityClassName: params.controller.priority_class_name,
-          affinity: {
-            podAntiAffinity: {
-              requiredDuringSchedulingIgnoredDuringExecution: [
-                {
-                  labelSelector: {
-                    matchExpressions: [
-                      {
-                        key: 'app',
-                        operator: 'In',
-                        values: [ 'vsphere-csi-controller' ],
-                      },
-                    ],
-                  },
-                  topologyKey: 'kubernetes.io/hostname',
-                },
-              ],
-            },
-          },
+          affinity: controllerAffinity,
           serviceAccountName: 'vsphere-csi-controller',
-          nodeSelector: params.controller.node_selector,
+          [if std.length(std.objectFields(params.controller.node_selector)) > 0 then 'nodeSelector']:
+            params.controller.node_selector,
           tolerations: params.controller.tolerations,
           dnsPolicy: 'Default',
           containers: [
@@ -424,6 +469,7 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                 '--leader-election-retry-period=30s',
                 '--kube-api-qps=100',
                 '--kube-api-burst=100',
+                '--worker-threads=100',
               ],
               env: [
                 {
@@ -473,6 +519,7 @@ assert std.length(std.objectFields(vcenters)) > 0 :
               args: [
                 '--fss-name=%s' % params.feature_states_configmap_name,
                 '--fss-namespace=$(CSI_NAMESPACE)',
+                '--enable-profile-server=false',
               ],
               env: [
                 {
@@ -516,6 +563,11 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                   },
                 },
               ],
+              securityContext: {
+                runAsNonRoot: true,
+                runAsUser: 65532,
+                runAsGroup: 65532,
+              },
               volumeMounts: [
                 {
                   mountPath: '/etc/cloud',
@@ -570,11 +622,12 @@ assert std.length(std.objectFields(vcenters)) > 0 :
               imagePullPolicy: params.controller.image_pull_policy,
               args: [
                 '--leader-election',
-                '--leader-election-lease-duration=120s',
-                '--leader-election-renew-deadline=60s',
-                '--leader-election-retry-period=30s',
+                '--leader-election-lease-duration=30s',
+                '--leader-election-renew-deadline=20s',
+                '--leader-election-retry-period=10s',
                 '--fss-name=%s' % params.feature_states_configmap_name,
                 '--fss-namespace=$(CSI_NAMESPACE)',
+                '--enable-profile-server=false',
               ],
               ports: [
                 {
@@ -605,10 +658,6 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                   value: '100',
                 },
                 {
-                  name: 'GODEBUG',
-                  value: 'x509sha1=1',
-                },
-                {
                   name: 'CSI_NAMESPACE',
                   valueFrom: {
                     fieldRef: {
@@ -617,6 +666,11 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                   },
                 },
               ],
+              securityContext: {
+                runAsNonRoot: true,
+                runAsUser: 65532,
+                runAsGroup: 65532,
+              },
               volumeMounts: [
                 {
                   mountPath: '/etc/cloud',
@@ -666,6 +720,7 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                 '--leader-election-lease-duration=120s',
                 '--leader-election-renew-deadline=60s',
                 '--leader-election-retry-period=30s',
+                '--extra-create-metadata',
               ],
               env: [
                 {
@@ -804,10 +859,6 @@ assert std.length(std.objectFields(vcenters)) > 0 :
                 {
                   name: 'LOGGER_LEVEL',
                   value: 'PRODUCTION',
-                },
-                {
-                  name: 'GODEBUG',
-                  value: 'x509sha1=1',
                 },
                 {
                   name: 'CSI_NAMESPACE',

@@ -10,6 +10,11 @@ default:: `vmware-system-csi`
 
 The namespace in which to deploy this component.
 
+[NOTE]
+====
+When `facts.distribution` is `openshift4`, the component additionally creates namespace-local `RoleBinding` objects granting the `privileged` SCC to both CSI service accounts.
+====
+
 == `csidriver_name`
 
 [horizontal]
@@ -143,7 +148,7 @@ Dictionary rendered as `[TopologyCategory "<name>"]` sections.
 
 [horizontal]
 type:: dictionary
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.0.0 defaults], with Windows support disabled
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 defaults], excluding the Windows daemon set
 
 The feature state switches rendered into the driver `ConfigMap`.
 
@@ -153,7 +158,7 @@ The feature state switches rendered into the driver `ConfigMap`.
 type:: dictionary
 
 Container images for the controller sidecars, node sidecars, CSI driver, and syncer.
-Defaults follow the upstream v3.0.0 Linux deployment manifest.
+Defaults follow the upstream v3.6.1 Linux deployment manifest.
 
 == `controller`
 
@@ -223,10 +228,19 @@ default::
 +
 [source,yaml]
 ----
-node-role.kubernetes.io/control-plane: ""
+{}
 ----
 
-Node selector for the controller deployment.
+Optional extra node selector for the controller deployment.
+
+=== `controller.node_affinity`
+
+[horizontal]
+type:: dictionary
+default:: https://raw.githubusercontent.com/kubernetes-sigs/vsphere-csi-driver/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 control-plane node affinity]
+
+Node affinity for the controller deployment.
+By default this matches upstream and allows any of the common control-plane labels.
 
 === `controller.tolerations`
 
