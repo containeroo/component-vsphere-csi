@@ -1,0 +1,98 @@
+---
+parameters:
+  vsphere_csi:
+    namespace: vmware-system-csi
+    csidriver_name: csi.vsphere.vmware.com
+    config_secret_name: vsphere-config-secret
+    feature_states_configmap_name: internal-feature-states.csi.vsphere.vmware.com
+
+    configuration:
+      global:
+        cluster-id: ${cluster:name}
+        cluster-distribution: ${facts:distribution}
+
+    feature_states:
+      csi-migration: "true"
+      csi-auth-check: "true"
+      online-volume-extend: "true"
+      trigger-csi-fullsync: "false"
+      async-query-volume: "true"
+      block-volume-snapshot: "true"
+      csi-windows-support: "false"
+      use-csinode-id: "true"
+      list-volumes: "true"
+      pv-to-backingdiskobjectid-mapping: "false"
+      cnsmgr-suspend-create-volume: "true"
+      topology-preferential-datastores: "true"
+      max-pvscsi-targets-per-vm: "true"
+      multi-vcenter-csi-topology: "true"
+      csi-internal-generated-cluster-id: "true"
+      listview-tasks: "false"
+
+    images:
+      csi_attacher:
+        registry: k8s.gcr.io
+        repository: sig-storage/csi-attacher
+        tag: v4.2.0
+      csi_resizer:
+        registry: k8s.gcr.io
+        repository: sig-storage/csi-resizer
+        tag: v1.7.0
+      driver:
+        registry: gcr.io
+        repository: cloud-provider-vsphere/csi/release/driver
+        tag: v3.0.0
+      syncer:
+        registry: gcr.io
+        repository: cloud-provider-vsphere/csi/release/syncer
+        tag: v3.0.0
+      liveness_probe:
+        registry: k8s.gcr.io
+        repository: sig-storage/livenessprobe
+        tag: v2.9.0
+      csi_provisioner:
+        registry: k8s.gcr.io
+        repository: sig-storage/csi-provisioner
+        tag: v3.4.0
+      csi_snapshotter:
+        registry: k8s.gcr.io
+        repository: sig-storage/csi-snapshotter
+        tag: v6.2.1
+      csi_node_driver_registrar:
+        registry: k8s.gcr.io
+        repository: sig-storage/csi-node-driver-registrar
+        tag: v2.7.0
+
+    controller:
+      replicas: 3
+      max_unavailable: 1
+      max_surge: 0
+      priority_class_name: system-cluster-critical
+      image_pull_policy: Always
+      full_sync_interval_minutes: 30
+      default_fstype: ext4
+      node_selector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      resources: {}
+
+    node:
+      max_unavailable: 1
+      priority_class_name: system-node-critical
+      image_pull_policy: Always
+      max_volumes_per_node: 59
+      nodegetinfo_watch_timeout_minutes: 1
+      node_selector:
+        kubernetes.io/os: linux
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+      resources: {}

@@ -1,0 +1,349 @@
+= Parameters
+
+The parent key for all of the following parameters is `vsphere_csi`.
+
+== `namespace`
+
+[horizontal]
+type:: string
+default:: `vmware-system-csi`
+
+The namespace in which to deploy this component.
+
+== `csidriver_name`
+
+[horizontal]
+type:: string
+default:: `csi.vsphere.vmware.com`
+
+The `CSIDriver` resource name and the kubelet plugin directory name for the driver.
+
+== `config_secret_name`
+
+[horizontal]
+type:: string
+default:: `vsphere-config-secret`
+
+The name of the Secret containing `csi-vsphere.conf`.
+
+== `feature_states_configmap_name`
+
+[horizontal]
+type:: string
+default:: `internal-feature-states.csi.vsphere.vmware.com`
+
+The name of the feature state `ConfigMap` used by the controller and node driver.
+
+== `configuration`
+
+This parameter renders the `csi-vsphere.conf` file stored in the Secret referenced by the driver.
+
+Reserved top-level keys under `configuration` are:
+
+* `global`
+* `labels`
+* `net_permissions`
+* `snapshot`
+* `topology_category`
+
+All other top-level keys are treated as vCenter hostnames or IPs and are rendered as `VirtualCenter` sections.
+
+[IMPORTANT]
+====
+This component intentionally only defaults the two global identifiers below.
+All vCenter connection details must be provided by the cluster inventory.
+====
+
+=== `configuration.global`
+
+[horizontal]
+type:: dictionary
+default::
++
+[source,yaml]
+----
+cluster-id: ${cluster:name}
+cluster-distribution: ${facts:distribution}
+----
+
+Values for the `[Global]` section in `csi-vsphere.conf`.
+
+Common keys are:
+
+* `cluster-id`
+* `cluster-distribution`
+* `supervisor-id`
+* `ca-file`
+* `thumbprint`
+* `datacenters`
+* `csi-auth-check-intervalinmin`
+* `csi-fetch-preferred-datastores-intervalinmin`
+* `cnsregistervolumes-cleanup-intervalinmin`
+* `cnsvolumeoperationrequest-cleanup-intervalinmin`
+* `list-volume-threshold`
+* `query-limit`
+* `vc-client-timeout`
+* `volumemigration-cr-cleanup-intervalinmin`
+
+=== `configuration.<vcenter>`
+
+[horizontal]
+type:: dictionary
+default:: none
+
+Values for a `[VirtualCenter "<vcenter>"]` section.
+
+Typical keys are:
+
+* `user`
+* `password`
+* `port`
+* `insecure-flag`
+* `datacenters`
+* `targetvSANFileShareDatastoreURLs`
+* `targetvSANFileShareClusters`
+* `migration-datastore-url`
+
+At least one vCenter entry is required.
+
+=== `configuration.labels`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Values for the `[Labels]` section, for example `topology-categories`.
+
+=== `configuration.net_permissions`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Dictionary rendered as `[NetPermissions "<name>"]` sections.
+This is primarily relevant for file volume access control.
+
+=== `configuration.snapshot`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Values for the `[Snapshot]` section.
+
+=== `configuration.topology_category`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Dictionary rendered as `[TopologyCategory "<name>"]` sections.
+
+== `feature_states`
+
+[horizontal]
+type:: dictionary
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.0.0 defaults], with Windows support disabled
+
+The feature state switches rendered into the driver `ConfigMap`.
+
+== `images`
+
+[horizontal]
+type:: dictionary
+
+Container images for the controller sidecars, node sidecars, CSI driver, and syncer.
+Defaults follow the upstream v3.0.0 Linux deployment manifest.
+
+== `controller`
+
+Controller deployment settings.
+
+=== `controller.replicas`
+
+[horizontal]
+type:: integer
+default:: `3`
+
+Number of controller replicas.
+
+=== `controller.max_unavailable`
+
+[horizontal]
+type:: integer
+default:: `1`
+
+`maxUnavailable` for the controller rolling update strategy.
+
+=== `controller.max_surge`
+
+[horizontal]
+type:: integer
+default:: `0`
+
+`maxSurge` for the controller rolling update strategy.
+
+=== `controller.priority_class_name`
+
+[horizontal]
+type:: string
+default:: `system-cluster-critical`
+
+Priority class used by the controller deployment.
+
+=== `controller.image_pull_policy`
+
+[horizontal]
+type:: string
+default:: `Always`
+
+Image pull policy used by the CSI controller and syncer containers.
+
+=== `controller.full_sync_interval_minutes`
+
+[horizontal]
+type:: integer
+default:: `30`
+
+Value for the `FULL_SYNC_INTERVAL_MINUTES` environment variable on the syncer.
+
+=== `controller.default_fstype`
+
+[horizontal]
+type:: string
+default:: `ext4`
+
+Default filesystem type used by the provisioner sidecar.
+
+=== `controller.node_selector`
+
+[horizontal]
+type:: dictionary
+default::
++
+[source,yaml]
+----
+node-role.kubernetes.io/control-plane: ""
+----
+
+Node selector for the controller deployment.
+
+=== `controller.tolerations`
+
+[horizontal]
+type:: list
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream control-plane tolerations]
+
+Tolerations for the controller deployment.
+
+=== `controller.resources`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Optional container resources keyed by container name:
+
+* `csi_attacher`
+* `csi_provisioner`
+* `csi_resizer`
+* `csi_snapshotter`
+* `liveness_probe`
+* `vsphere_csi_controller`
+* `vsphere_syncer`
+
+== `node`
+
+Linux node DaemonSet settings.
+
+=== `node.max_unavailable`
+
+[horizontal]
+type:: integer
+default:: `1`
+
+`maxUnavailable` for the node DaemonSet rolling update strategy.
+
+=== `node.priority_class_name`
+
+[horizontal]
+type:: string
+default:: `system-node-critical`
+
+Priority class used by the node DaemonSet.
+
+=== `node.image_pull_policy`
+
+[horizontal]
+type:: string
+default:: `Always`
+
+Image pull policy used by the Linux node driver container.
+
+=== `node.max_volumes_per_node`
+
+[horizontal]
+type:: integer
+default:: `59`
+
+Value for the `MAX_VOLUMES_PER_NODE` environment variable.
+
+=== `node.nodegetinfo_watch_timeout_minutes`
+
+[horizontal]
+type:: integer
+default:: `1`
+
+Value for the `NODEGETINFO_WATCH_TIMEOUT_MINUTES` environment variable.
+
+=== `node.node_selector`
+
+[horizontal]
+type:: dictionary
+default::
++
+[source,yaml]
+----
+kubernetes.io/os: linux
+----
+
+Node selector for the Linux node DaemonSet.
+
+=== `node.tolerations`
+
+[horizontal]
+type:: list
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.0.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream node tolerations]
+
+Tolerations for the Linux node DaemonSet.
+
+=== `node.resources`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Optional container resources keyed by container name:
+
+* `liveness_probe`
+* `node_driver_registrar`
+* `vsphere_csi_node`
+
+== Example
+
+[source,yaml]
+----
+namespace: vmware-system-csi
+configuration:
+  global:
+    cluster-id: ${cluster:name}
+    cluster-distribution: ${facts:distribution}
+  vcsa-01.example.com:
+    user: ${vaultkv:${cluster:tenant}/${cluster:name}/vsphere:username}
+    password: ${vaultkv:${cluster:tenant}/${cluster:name}/vsphere:password}
+    port: "443"
+    insecure-flag: "false"
+    datacenters: DC0
+  labels:
+    topology-categories: k8s-zone,k8s-region
+----

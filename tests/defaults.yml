@@ -1,0 +1,16 @@
+# Overwrite parameters here
+
+parameters:
+  facts:
+    distribution: kind
+  vsphere_csi:
+    configuration:
+      global:
+        cluster-id: test-cluster
+        cluster-distribution: kind
+      vcsa-01.example.com:
+        user: administrator@vsphere.local
+        password: changeme
+        port: "443"
+        insecure-flag: "true"
+        datacenters: DC0
