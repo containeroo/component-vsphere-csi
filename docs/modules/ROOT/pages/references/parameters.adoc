@@ -144,6 +144,97 @@ default:: `{}`
 
 Dictionary rendered as `[TopologyCategory "<name>"]` sections.
 
+== `storage_classes`
+
+[horizontal]
+type:: dictionary
+default::
++
+[source,yaml]
+----
+block:
+  enabled: true
+  name: vsphere-csi
+  default_class: false
+  annotations: {}
+  parameters: {}
+  allow_volume_expansion: true
+  reclaim_policy: Delete
+----
+
+StorageClasses to render for the vSphere CSI driver.
+The keys of this dictionary are only inventory-local identifiers.
+The generated Kubernetes object name comes from `storage_classes.<key>.name`.
+
+=== `storage_classes.<name>.enabled`
+
+[horizontal]
+type:: boolean
+default:: `true`
+
+Whether to render this StorageClass.
+
+=== `storage_classes.<name>.name`
+
+[horizontal]
+type:: string
+default:: `vsphere-csi` for the built-in `block` class
+
+The Kubernetes `StorageClass.metadata.name`.
+
+=== `storage_classes.<name>.default_class`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+If set to `true`, the component adds annotation `storageclass.kubernetes.io/is-default-class: "true"`.
+
+=== `storage_classes.<name>.annotations`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Additional annotations for the StorageClass.
+
+=== `storage_classes.<name>.parameters`
+
+[horizontal]
+type:: dictionary
+default:: `{}`
+
+Parameters passed to the vSphere CSI provisioner.
+Common examples are:
+
+* `storagepolicyname`
+* `datastoreurl`
+* `csi.storage.k8s.io/fstype`
+
+=== `storage_classes.<name>.allow_volume_expansion`
+
+[horizontal]
+type:: boolean
+default:: unset
+
+If set, renders `allowVolumeExpansion`.
+
+=== `storage_classes.<name>.reclaim_policy`
+
+[horizontal]
+type:: string
+default:: unset
+
+If set, renders `reclaimPolicy`.
+
+=== `storage_classes.<name>.volume_binding_mode`
+
+[horizontal]
+type:: string
+default:: unset
+
+If set, renders `volumeBindingMode`.
+
 == `feature_states`
 
 [horizontal]
@@ -348,6 +439,13 @@ Optional container resources keyed by container name:
 [source,yaml]
 ----
 namespace: vmware-system-csi
+storage_classes:
+  block:
+    enabled: true
+    name: example-sc
+    default_class: false
+    parameters:
+      storagepolicyname: vSAN Default Storage Policy
 configuration:
   global:
     cluster-id: ${cluster:name}

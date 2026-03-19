@@ -11,6 +11,16 @@ parameters:
         cluster-id: ${cluster:name}
         cluster-distribution: ${facts:distribution}
 
+    storage_classes:
+      block:
+        enabled: true
+        name: vsphere-csi
+        default_class: false
+        annotations: {}
+        parameters: {}
+        allow_volume_expansion: true
+        reclaim_policy: Delete
+
     feature_states:
       trigger-csi-fullsync: "false"
       pv-to-backingdiskobjectid-mapping: "false"

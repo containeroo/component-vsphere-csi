@@ -12,6 +12,7 @@ local reservedConfigurationKeys = [
 ];
 
 local configuration = std.get(params, 'configuration', {});
+local storageClasses = std.get(params, 'storage_classes', {});
 local globalConfiguration = std.get(configuration, 'global', {});
 local netPermissions = std.get(configuration, 'net_permissions', {});
 local topologyCategories = std.get(configuration, 'topology_category', {});
@@ -117,6 +118,33 @@ local controllerAffinity = {
     { nodeAffinity: params.controller.node_affinity }
 );
 
+local renderStorageClass(name, sc) = {
+  apiVersion: 'storage.k8s.io/v1',
+  kind: 'StorageClass',
+  metadata: {
+    name: sc.name,
+    [if std.length(std.objectFields(
+      (if std.get(sc, 'default_class', false) then
+         { 'storageclass.kubernetes.io/is-default-class': 'true' }
+       else
+         {}) + std.get(sc, 'annotations', {})
+    )) > 0 then 'annotations']:
+      (if std.get(sc, 'default_class', false) then
+         { 'storageclass.kubernetes.io/is-default-class': 'true' }
+       else
+         {}) + std.get(sc, 'annotations', {}),
+  },
+  provisioner: params.csidriver_name,
+  [if std.length(std.objectFields(std.get(sc, 'parameters', {}))) > 0 then 'parameters']:
+    std.get(sc, 'parameters', {}),
+  [if std.get(sc, 'allow_volume_expansion', null) != null then 'allowVolumeExpansion']:
+    sc.allow_volume_expansion,
+  [if std.get(sc, 'reclaim_policy', null) != null then 'reclaimPolicy']:
+    sc.reclaim_policy,
+  [if std.get(sc, 'volume_binding_mode', null) != null then 'volumeBindingMode']:
+    sc.volume_binding_mode,
+};
+
 assert std.length(std.objectFields(vcenters)) > 0 :
        'vsphere_csi.configuration must define at least one vCenter section besides the reserved keys %s' %
        std.join(', ', reservedConfigurationKeys);
@@ -137,6 +165,11 @@ assert std.length(std.objectFields(vcenters)) > 0 :
       podInfoOnMount: false,
     },
   },
+} + {
+  ['01_storageclass_%s' % name]: renderStorageClass(name, storageClasses[name])
+  for name in std.sort(std.objectFields(storageClasses))
+  if std.get(storageClasses[name], 'enabled', false)
+} + {
 
   '02_controller-serviceaccount': {
     apiVersion: 'v1',
