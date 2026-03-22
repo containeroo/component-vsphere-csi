@@ -24,7 +24,6 @@ parameters:
     feature_states:
       trigger-csi-fullsync: "false"
       pv-to-backingdiskobjectid-mapping: "false"
-      csi-transaction-support: "false"
 
     images:
       csi_attacher:
@@ -38,11 +37,11 @@ parameters:
       driver:
         registry: registry.k8s.io
         repository: csi-vsphere/driver
-        tag: v3.6.1
+        tag: v3.7.0
       syncer:
         registry: registry.k8s.io
         repository: csi-vsphere/syncer
-        tag: v3.6.1
+        tag: v3.7.0
       liveness_probe:
         registry: registry.k8s.io
         repository: sig-storage/livenessprobe
