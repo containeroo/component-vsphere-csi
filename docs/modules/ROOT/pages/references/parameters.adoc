@@ -239,7 +239,7 @@ If set, renders `volumeBindingMode`.
 
 [horizontal]
 type:: dictionary
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 defaults], excluding the Windows daemon set
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.7.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 defaults], excluding the Windows daemon set
 
 The feature state switches rendered into the driver `ConfigMap`.
 
@@ -249,7 +249,7 @@ The feature state switches rendered into the driver `ConfigMap`.
 type:: dictionary
 
 Container images for the controller sidecars, node sidecars, CSI driver, and syncer.
-Defaults follow the upstream v3.6.1 Linux deployment manifest.
+Defaults follow the upstream v3.7.0 Linux deployment manifest.
 
 == `controller`
 
@@ -328,7 +328,7 @@ Optional extra node selector for the controller deployment.
 
 [horizontal]
 type:: dictionary
-default:: https://raw.githubusercontent.com/kubernetes-sigs/vsphere-csi-driver/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 control-plane node affinity]
+default:: https://raw.githubusercontent.com/kubernetes-sigs/vsphere-csi-driver/v3.7.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream v3.6.1 control-plane node affinity]
 
 Node affinity for the controller deployment.
 By default this matches upstream and allows any of the common control-plane labels.
@@ -337,7 +337,7 @@ By default this matches upstream and allows any of the common control-plane labe
 
 [horizontal]
 type:: list
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream control-plane tolerations]
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.7.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream control-plane tolerations]
 
 Tolerations for the controller deployment.
 
@@ -418,7 +418,7 @@ Node selector for the Linux node DaemonSet.
 
 [horizontal]
 type:: list
-default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.6.1/manifests/vanilla/vsphere-csi-driver.yaml[Upstream node tolerations]
+default:: https://github.com/kubernetes-sigs/vsphere-csi-driver/blob/v3.7.0/manifests/vanilla/vsphere-csi-driver.yaml[Upstream node tolerations]
 
 Tolerations for the Linux node DaemonSet.
 
