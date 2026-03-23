@@ -1,7 +1,7 @@
 ---
 parameters:
   vsphere_csi:
-    namespace: vmware-system-csi
+    namespace: syn-vsphere-csi
     csidriver_name: csi.vsphere.vmware.com
     config_secret_name: vsphere-config-secret
     feature_states_configmap_name: internal-feature-states.csi.vsphere.vmware.com

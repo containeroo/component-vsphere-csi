@@ -9,4 +9,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: vsphere-csi-controller
-    namespace: vmware-system-csi
+    namespace: syn-vsphere-csi

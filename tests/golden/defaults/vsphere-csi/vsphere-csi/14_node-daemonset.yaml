@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: vsphere-csi-node
-  namespace: vmware-system-csi
+  namespace: syn-vsphere-csi
 spec:
   selector:
     matchLabels:

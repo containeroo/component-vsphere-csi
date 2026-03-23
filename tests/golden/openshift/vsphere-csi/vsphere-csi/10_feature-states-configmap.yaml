@@ -5,4 +5,4 @@ data:
 kind: ConfigMap
 metadata:
   name: internal-feature-states.csi.vsphere.vmware.com
-  namespace: vmware-system-csi
+  namespace: syn-vsphere-csi

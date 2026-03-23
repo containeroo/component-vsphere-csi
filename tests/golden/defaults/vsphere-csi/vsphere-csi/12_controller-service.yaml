@@ -4,7 +4,7 @@ metadata:
   labels:
     app: vsphere-csi-controller
   name: vsphere-csi-controller
-  namespace: vmware-system-csi
+  namespace: syn-vsphere-csi
 spec:
   ports:
     - name: ctlr
