@@ -63,7 +63,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: NODEGETINFO_WATCH_TIMEOUT_MINUTES
               value: '1'
-          image: registry.k8s.io/csi-vsphere/driver:v3.6.1
+          image: registry.k8s.io/csi-vsphere/driver:v3.7.0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
