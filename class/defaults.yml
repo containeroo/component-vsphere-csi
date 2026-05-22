@@ -37,7 +37,7 @@ parameters:
       driver:
         registry: registry.k8s.io
         repository: csi-vsphere/driver
-        tag: v3.7.0
+        tag: v3.7.1
       syncer:
         registry: registry.k8s.io
         repository: csi-vsphere/syncer
