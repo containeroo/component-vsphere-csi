@@ -93,19 +93,42 @@ function extractManifestImage(manifestText, containerName) {
 }
 
 function extractFeatureStates(manifestText) {
-  const match = manifestText.match(
-    /apiVersion:\s+v1\ndata:\n((?:  ".*": ".*"\n)+)kind:\s+ConfigMap\nmetadata:\n  name:\s+internal-feature-states\.csi\.vsphere\.vmware\.com\n  namespace:\s+vmware-system-csi/m
-  );
+  const configMapDoc = manifestText
+    .split(/^---\s*$/m)
+    .find(
+      (doc) =>
+        doc.includes('kind: ConfigMap') &&
+        doc.includes('name: internal-feature-states.csi.vsphere.vmware.com') &&
+        doc.includes('namespace: vmware-system-csi')
+    );
 
-  if (!match) {
+  if (!configMapDoc) {
     throw new Error('Unable to find internal feature states ConfigMap in upstream manifest');
   }
 
-  return match[1]
-    .trimEnd()
-    .split('\n')
+  const lines = configMapDoc.split('\n');
+  const dataIndex = lines.findIndex((line) => line === 'data:');
+
+  if (dataIndex === -1) {
+    throw new Error('Unable to find data section in internal feature states ConfigMap');
+  }
+
+  const stateLines = [];
+  for (const line of lines.slice(dataIndex + 1)) {
+    if (!line.startsWith('  ')) {
+      break;
+    }
+
+    if (line.trim() === '') {
+      continue;
+    }
+
+    stateLines.push(line);
+  }
+
+  return stateLines
     .map((line) => {
-      const stateMatch = line.match(/^  "([^"]+)": "([^"]+)"$/);
+      const stateMatch = line.match(/^  "([^"]+)": "([^"]+)"(?:\s+#.*)?$/);
       if (!stateMatch) {
         throw new Error(`Unable to parse feature state line: ${line}`);
       }
@@ -208,6 +231,14 @@ function rewriteDocs(docsText, releaseTag) {
     .replace(
       /Defaults follow the upstream v[0-9.]+ Linux deployment manifest\./,
       `Defaults follow the upstream ${releaseTag} Linux deployment manifest.`
+    )
+    .replace(
+      /\[Upstream v[0-9.]+ defaults\]/g,
+      `[Upstream ${releaseTag} defaults]`
+    )
+    .replace(
+      /\[Upstream v[0-9.]+ control-plane node affinity\]/g,
+      `[Upstream ${releaseTag} control-plane node affinity]`
     );
 }
 
