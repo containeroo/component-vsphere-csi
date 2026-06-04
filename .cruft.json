@@ -1,10 +1,10 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "7e46facc758385bc32eeecab92b4639c66fd4e4f",
+  "commit": "a5def401e0fd625486a985167f14b1e383a698be",
   "skip": [
     ".github/workflows/*"
   ],
-  "checkout": "main",
+  "checkout": null,
   "context": {
     "cookiecutter": {
       "name": "vsphere-csi",
@@ -28,7 +28,7 @@
       "github_name": "component-vsphere-csi",
       "github_url": "https://github.com/projectsyn/component-vsphere-csi",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "7e46facc758385bc32eeecab92b4639c66fd4e4f"
+      "_commit": "a5def401e0fd625486a985167f14b1e383a698be"
     }
   },
   "directory": null
