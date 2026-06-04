@@ -1,0 +1,48 @@
+---
+name: Cruft Update
+
+"on":
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Cruft
+        run: pip install cruft
+
+      - name: Check for Cruft updates
+        id: check
+        shell: bash
+        run: |
+          if cruft check; then
+            echo "has_changes=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply Cruft update
+        if: steps.check.outputs.has_changes == '1'
+        run: cruft update --skip-apply-ask --refresh-private-variables
+
+      - name: Create pull request
+        if: steps.check.outputs.has_changes == '1'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: cruft/update
+          title: "chore: update from Cruft template"
+          commit-message: "chore: update from Cruft template"
+          body: "Automated Cruft update from the upstream Cookiecutter template."
+          delete-branch: true
