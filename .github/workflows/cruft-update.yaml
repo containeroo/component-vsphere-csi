@@ -41,7 +41,6 @@ jobs:
         if: steps.check.outputs.has_changes == '1'
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.CRUFT_UPDATE_TOKEN }}
           branch: cruft/update
           title: "chore: update from Cruft template"
           commit-message: "chore: update from Cruft template"
